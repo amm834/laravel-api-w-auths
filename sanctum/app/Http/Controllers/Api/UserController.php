@@ -49,8 +49,8 @@ class UserController extends Controller
             'password.required' => 'Password must be provided',
         ]);
 
-        $token = auth()->attempt($validatedUser);
-        if (!$token) {
+        $auth = auth()->attempt($validatedUser);
+        if (!$auth) {
             return response()->json([
                 'meta' => [
                     'status' => 400
@@ -58,6 +58,8 @@ class UserController extends Controller
                 'message' => 'Invalid credentials'
             ]);
         }
+        // create token
+        $token = auth()->user()->createToken('access_token')->plainTextToken;
         return response()->json([
             'meta' => [
                 'status' => 200
@@ -84,10 +86,8 @@ class UserController extends Controller
     public function logout()
     {
         // delete all user token
-        auth()->logout();
+        auth()->user()->tokens()->delete(); // or -> revoke()
 
         return response('', 204);
     }
-
-
 }
